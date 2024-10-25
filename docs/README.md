@@ -71,6 +71,7 @@ accelerate launch  main.py \
 [HumanEvalPack](https://huggingface.co/datasets/bigcode/humanevalpack) extends HumanEval to **3** scenarios across **6** languages via human annotations. There are different prompting options depending on the model that can be specified with the `--prompt` flag:
 - `continue`: This prompt is the same as HumanEval and only works for HumanEvalSynthesize
 - `instruct`: For this prompt an intuitive instruction is given to the model to tell it what to do.
+- `chat`: For instruction-tuned and chat models apply the chat template to the prompt.
 - `octocoder`, `wizardcoder`, `instructcodet5p` etc.: These are custom prompt formats for individual models to align with how they were finetuned.
 
 The three scenarios are listed below. The selectable languages are: `python`, `js`, `java`, `go`, `cpp` & `rust`.

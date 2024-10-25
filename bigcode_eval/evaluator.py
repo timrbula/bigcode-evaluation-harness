@@ -41,7 +41,7 @@ class Evaluator:
         self.allow_code_execution = args.allow_code_execution
 
     def generate_text(self, task_name, intermediate_generations=None):
-        task = tasks.get_task(task_name, self.args)
+        task = tasks.get_task(task_name, self.args, self.tokenizer)
         dataset = task.get_dataset()
         # if args.limit is None, use all samples
         # if args.limit is used, make sure args.limit_start + args.limit <= len(dataset)
@@ -88,7 +88,7 @@ class Evaluator:
         return generations, references
 
     def evaluate(self, task_name, intermediate_generations=None):
-        task = tasks.get_task(task_name, self.args)
+        task = tasks.get_task(task_name, self.args, self.tokenizer)
         if task.requires_execution and not self.allow_code_execution:
             raise ValueError(_WARNING)
 

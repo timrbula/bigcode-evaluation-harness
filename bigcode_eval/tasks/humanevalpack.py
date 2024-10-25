@@ -133,20 +133,20 @@ def create_all_tasks():
 
 def create_task(language, name):
     class HumanEvalFixTests(HumanEvalFixBase):
-        def __init__(self, language=language, prompt="instruct"):
-            super().__init__(language=language, prompt=prompt, with_docs=False)
+        def __init__(self, language=language, prompt="instruct", tokenizer=None):
+            super().__init__(language=language, prompt=prompt, with_docs=False, tokenizer=tokenizer)
     class HumanEvalFixDocs(HumanEvalFixBase):
-        def __init__(self, language=language, prompt="instruct"):            
-            super().__init__(language=language, prompt=prompt, with_docs=True)
+        def __init__(self, language=language, prompt="instruct", tokenizer=None):            
+            super().__init__(language=language, prompt=prompt, with_docs=True, tokenizer=tokenizer)
     class HumanEvalExplainDescribe(HumanEvalExplainDescribeBase):
-        def __init__(self, language=language, prompt="instruct"):
-            super().__init__(language=language, prompt=prompt, with_docs=False)   
+        def __init__(self, language=language, prompt="instruct", tokenizer=None):
+            super().__init__(language=language, prompt=prompt, with_docs=False, tokenizer=tokenizer)   
     class HumanEvalExplainSynthesize(HumanEvalExplainSynthesizeBase):
-        def __init__(self, language=language, prompt="instruct", load_data_path=None):
-            super().__init__(language=language, prompt=prompt, with_docs=False, load_data_path=load_data_path)
+        def __init__(self, language=language, prompt="instruct", load_data_path=None, tokenizer=None):
+            super().__init__(language=language, prompt=prompt, with_docs=False, load_data_path=load_data_path, tokenizer=tokenizer)
     class HumanEvalSynthesize(HumanEvalSynthesizeBase):
-        def __init__(self, language=language, prompt="instruct"):
-            super().__init__(language=language, prompt=prompt, with_docs=True)
+        def __init__(self, language=language, prompt="instruct", tokenizer=None):
+            super().__init__(language=language, prompt=prompt, with_docs=True, tokenizer=tokenizer),
     
     if name == "fixtests": return HumanEvalFixTests
     elif name == "fixdocs": return HumanEvalFixDocs
@@ -160,7 +160,7 @@ class HumanEvalPack(Task):
     DATASET_PATH = "bigcode/humanevalpack"
     DATASET_NAME = None
 
-    def __init__(self, prompt="instruct", language="python", with_docs=True):
+    def __init__(self, prompt="instruct", language="python", with_docs=True, tokenizer=None):
         
         self.DATASET_NAME = language
         self.prompt = prompt        
@@ -181,6 +181,7 @@ class HumanEvalPack(Task):
             stop_words.append("```")
         stop_words.append("<|endoftext|>")
         self.with_docs = with_docs
+        self.tokenizer = tokenizer
         super().__init__(stop_words=stop_words, requires_execution=True)
 
     def get_dataset(self):
@@ -210,6 +211,14 @@ class HumanEvalPack(Task):
             prompt = prompt_base
         elif self.prompt == "instruct":
             prompt = inp + "\n\n" + prompt_base
+        elif self.prompt == "chat":
+            assert self.tokenizer.chat_template is not None, "The `chat` prompt should only be used for models that have a chat template."
+            prompt = self.tokenizer.apply_chat_template(
+                [{"role": "user", "content": inp}],
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+            prompt += prompt_base
         elif self.prompt == "octocoder":
             prompt = f'Question: {inp}\n\nAnswer:\n{prompt_base}'
         elif self.prompt == "octogeex":
